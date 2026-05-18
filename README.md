@@ -8,7 +8,7 @@ implementing Merge Sort (DAA) and CPU Scheduling algorithms (OS).
 ## How to run
 
 ```bash
-git clone https://github.com/<your-repo>/SwiftShip.git
+git clone https://github.com/har5h1tha/SwiftShip.git
 cd SwiftShip
 python main.py              # basic run
 python main.py --trace      # shows merge sort step-by-step trace
