@@ -54,6 +54,8 @@ def fcfs(orders, num_stations=3):
     return stations
 
 
+#06c2a9bca8e12e2cba72d52067bc9801e995d1a6
+
 # ─────────────────────────────────────────────
 #  SJF — Shortest Job First
 # ─────────────────────────────────────────────
