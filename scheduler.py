@@ -48,6 +48,9 @@ def fcfs(orders, num_stations=3):
     for order in queue:
         # Pick station free earliest
         station = min(stations, key=lambda s: s.busy_until)
+        station.assign(order, station.busy_until)
+
+    return stations
 
 # ─────────────────────────────────────────────
 #  SJF — Shortest Job First (Harshita)
