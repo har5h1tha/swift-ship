@@ -52,10 +52,6 @@ def fcfs(orders, num_stations=3):
 
     return stations
 
-        # Assign order
-        station.assign(order, station.busy_until)
-
-    return stations
 # ─────────────────────────────────────────────
 #  SJF — Shortest Job First (Harshita)
 # ─────────────────────────────────────────────
