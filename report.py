@@ -9,19 +9,44 @@ def compute_metrics(stations):
     - Average turnaround time
     - Total orders shipped
     - First express order finish time
+    - Throughput (orders per hour)
+    - Makespan
+    - Station loads (dict of station_id -> total burst time)
     """
     all_orders = []
     for station in stations:
         all_orders.extend(station.orders)
 
     if not all_orders:
-        return {}
+        return {
+            "total_orders"     : 0,
+            "express_count"    : 0,
+            "avg_waiting"      : 0,
+            "avg_turnaround"   : 0,
+            "first_express_out": None,
+            "makespan"         : 0,
+            "throughput"       : 0,
+            "station_loads"    : {},
+        }
 
     waiting    = [o.waiting_time()    for o in all_orders if o.waiting_time()    is not None]
     turnaround = [o.turnaround_time() for o in all_orders if o.turnaround_time() is not None]
 
-    express_done = [o for o in all_orders if o.delivery_type == "express" and o.finish_time]
+    express_done  = [o for o in all_orders if o.delivery_type == "express" and o.finish_time]
     first_express = min(o.finish_time for o in express_done) if express_done else None
+
+    finish_times  = [o.finish_time for o in all_orders if o.finish_time is not None]
+    makespan      = max(finish_times) if finish_times else 0
+
+    # Throughput: orders completed per hour (60 min)
+    throughput = round((len(all_orders) / makespan) * 60, 2) if makespan > 0 else 0
+
+    # Station loads: station_id -> total burst time assigned
+    station_loads = {}
+    for station in stations:
+        station_loads[station.station_id] = round(
+            sum(o.burst_time for o in station.orders), 2
+        )
 
     return {
         "total_orders"     : len(all_orders),
@@ -29,7 +54,9 @@ def compute_metrics(stations):
         "avg_waiting"      : round(sum(waiting) / len(waiting), 2) if waiting else 0,
         "avg_turnaround"   : round(sum(turnaround) / len(turnaround), 2) if turnaround else 0,
         "first_express_out": first_express,
-        "makespan"         : max(o.finish_time for o in all_orders if o.finish_time),
+        "makespan"         : makespan,
+        "throughput"       : throughput,
+        "station_loads"    : station_loads,
     }
 
 
@@ -51,6 +78,7 @@ def print_report(results: dict):
         ["Avg turnaround",     *[f"{m['avg_turnaround']}min" for m in metrics.values()]],
         ["First express out",  *[f"t={m['first_express_out']}min" if m['first_express_out'] else "N/A" for m in metrics.values()]],
         ["Total makespan",     *[f"{m['makespan']}min"       for m in metrics.values()]],
+        ["Throughput",         *[f"{m['throughput']} ord/hr" for m in metrics.values()]],
     ]
 
     col_w = 22
@@ -62,7 +90,6 @@ def print_report(results: dict):
 
     print("="*70)
 
-    # Winner analysis
     best_wait = min(metrics, key=lambda k: metrics[k]["avg_waiting"])
     best_turn = min(metrics, key=lambda k: metrics[k]["avg_turnaround"])
     best_exp  = min(metrics, key=lambda k: metrics[k]["first_express_out"] or 9999)
@@ -74,9 +101,6 @@ def print_report(results: dict):
 
 
 def print_gantt(stations, title="Gantt Chart"):
-    """
-    Prints an ASCII Gantt chart showing order assignment per station.
-    """
     print(f"\n  {title}")
     print("  " + "-"*60)
     for station in stations:
@@ -90,10 +114,6 @@ def print_gantt(stations, title="Gantt Chart"):
 
 
 def save_chart(results: dict, filename="swiftship_chart.png"):
-    """
-    Optional: Save a bar chart comparing all algorithms.
-    Requires matplotlib — run: pip install matplotlib
-    """
     try:
         import matplotlib.pyplot as plt
         metrics = {name: compute_metrics(s) for name, s in results.items()}

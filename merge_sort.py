@@ -21,8 +21,6 @@ def merge_sort(orders, trace=False, depth=0):
       - Every element in result is from left ∪ right
       - result is sorted by priority_key()
       - No elements are lost or duplicated
-    This is maintained because we compare one element at a time
-    and always append the smaller one — classic merge invariant.
     """
     if len(orders) <= 1:
         return orders
@@ -36,8 +34,8 @@ def merge_sort(orders, trace=False, depth=0):
         print(f"{indent}DIVIDE  → LEFT:  {[o.order_id for o in left]}")
         print(f"{indent}         RIGHT: {[o.order_id for o in right]}")
 
-    left  = merge_sort(left,  trace, depth + 1)
-    right = merge_sort(right, trace, depth + 1)
+    left   = merge_sort(left,  trace, depth + 1)
+    right  = merge_sort(right, trace, depth + 1)
     merged = merge(left, right)
 
     if trace:
@@ -57,10 +55,9 @@ def merge(left, right):
       in sorted order from left[0..i-1] + right[0..j-1]
     """
     result = []
-    i = j = 0
+    i = j  = 0
 
     while i < len(left) and j < len(right):
-        # Compare by priority: express first, then lighter weight
         if left[i].priority_key() <= right[j].priority_key():
             result.append(left[i])
             i += 1
@@ -68,14 +65,13 @@ def merge(left, right):
             result.append(right[j])
             j += 1
 
-    # Append remaining (already sorted)
     result.extend(left[i:])
     result.extend(right[j:])
     return result
 
 
 # ─────────────────────────────────────────────
-#  TRACE MODE — shows every step on 8 orders
+#  TRACE MODE
 # ─────────────────────────────────────────────
 
 def trace_sort(orders):
@@ -95,32 +91,45 @@ def trace_sort(orders):
 
 
 # ─────────────────────────────────────────────
-#  BENCHMARK — Merge Sort vs Python sort()
+#  BENCHMARK — returns dict for dashboard use
 # ─────────────────────────────────────────────
 
 def benchmark(n=1000):
+    """
+    Benchmark merge_sort vs Python built-in sort.
+    Returns a dict with timing results (used by dashboard).
+    Also prints results to console.
+    """
     print(f"\n{'='*60}")
     print(f"  BENCHMARK — {n} orders")
     print(f"{'='*60}")
 
     orders = generate_orders(n)
 
-    # Merge Sort timing
     orders_copy1 = copy.deepcopy(orders)
     t1 = timeit.timeit(lambda: merge_sort(orders_copy1), number=1)
 
-    # Python built-in sort timing
     orders_copy2 = copy.deepcopy(orders)
     t2 = timeit.timeit(
         lambda: sorted(orders_copy2, key=lambda o: o.priority_key()),
         number=1
     )
 
+    ratio = round(t1 / t2, 2) if t2 > 0 else 1.0
+
     print(f"  Merge Sort time : {t1:.6f} seconds")
     print(f"  Python sort()   : {t2:.6f} seconds")
-    print(f"  Ratio           : Merge Sort is {t1/t2:.1f}x slower (expected — built-in uses Timsort in C)")
+    print(f"  Ratio           : Merge Sort is {ratio:.1f}x slower (expected — built-in uses Timsort in C)")
     print(f"  Both produce    : identical sorted output ✓")
     print(f"{'='*60}\n")
+
+    # Return dict so dashboard can display metrics
+    return {
+        "merge_sort"  : t1,
+        "python_sort" : t2,
+        "ratio"       : ratio,
+        "n"           : n,
+    }
 
 
 if __name__ == "__main__":
