@@ -17,13 +17,13 @@ python main.py --chart      # saves a comparison bar chart (needs matplotlib)
 
 ## Algorithms implemented
 
-| Algorithm     | Type       | Owner    | Purpose                          |
-|---------------|------------|----------|----------------------------------|
-| Merge Sort    | DAA D&C    | Mallya   | Sort orders by express + weight  |
-| FCFS          | OS Sched   | Mallika  | Arrival-order assignment         |
-| SJF           | OS Sched   | Harshitha | Shortest burst time first        |
-| Hybrid        | Bonus      | Mallika | SJF for express, FCFS for std    |
-| Breakdown     | Bonus      | Harshitha | Station failure + redistribution |
+| Algorithm     | Type                                                  | Owner     | Purpose                          |
+|---------------|-------------------------------------------------------|----------|----------------------------------|
+| Merge Sort    | DAA (Divide and Conquer)                              | Mallya   | Sort orders by express + weight  |
+| FCFS          | OS Scheduling (Non-preemptive, FIFO)                 | Mallika  | Arrival-order assignment         |
+| SJF           | OS Scheduling (Non-preemptive, Greedy)               | Harshitha| Shortest burst time first         |
+| Hybrid        | OS Scheduling (Multilevel Queue / Priority-based)    | Mallika  | SJF for express, FCFS for std    |
+| Breakdown     | Fault Tolerance / Recovery + Load Rebalancing        | Harshitha| Station failure + redistribution |
 
 ## File structure
 
